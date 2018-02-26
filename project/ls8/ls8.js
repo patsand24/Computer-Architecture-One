@@ -16,20 +16,36 @@ function processFile(content, cpu, onComplete) {
     // Loop through each line of machine code
 
     for (let line of lines) {
+        const comment = line.indexOf('#');
 
-        // !!! IMPLEMENT ME
+        // If we found one, cut off everything after
+        if (comment != -1) {
+        line = line.substr(0, comment);
+        }
 
-        // Strip comments
+        // Remove whitespace from either end
+        line = line.trim();
 
-        // Remove whitespace from either end of the line
+        if (line === '') {
+        // Line was blank or only a comment
+        continue;
+        }
 
-        // Ignore empty lines
+        // At this point, the line should just be the 1s and 0s
 
-        // Convert from binary string to numeric value
+        // Convert from binary string to number
+        const binValue = parseInt(line, 2); // Base 2 == binary
 
-        // Store in the CPU with the .poke() function
+        // Check to see if the parsing failed
+        if (isNaN(binValue)) {
+        console.error('Invalid binary number: ' + line);
+        process.exit(1);
+        }
 
-        // And on to the next one
+        // Ok, we have a good value, so store it into memory:
+        //console.log(`storing ${binValue}, ${line}`);
+        cpu.poke(curAddr, binValue);
+        
         curAddr++;
     }
 
