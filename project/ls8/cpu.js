@@ -6,11 +6,11 @@ const fs = require('fs');
 
 // Instructions
 
-const HLT  = 0b00000001; // Halt CPU
-// !!! IMPLEMENT ME
-// LDI
-// MUL
-// PRN
+const HLT = 0b00000001; // Halt CPU
+const ADD = 0b10101000; // ADD R R
+const MUL = 0b10101010; // MUL R R
+const LDI = 0b10011001; // LDI R I
+const PRN = 0b01000011; // PRN
 
 /**
  * Class for simulating a simple Computer (CPU & memory)
@@ -39,10 +39,10 @@ class CPU {
 		let bt = {};
 
         bt[HLT] = this.HLT;
-        // !!! IMPLEMENT ME
-        // LDI
-        // MUL
-        // PRN
+        bt[ADD] = this.ADD;
+        bt[MUL] = this.MUL;
+        bt[LDI] = this.LDI;
+        bt[PRN] = this.PRN;
 
 		this.branchTable = bt;
 	}
@@ -79,8 +79,11 @@ class CPU {
      */
     alu(op, regA, regB) {
         switch (op) {
+            case 'ADD':
+                this.reg[regA] = this.reg[regA] + this.reg[regB];
+                break;
             case 'MUL':
-                // !!! IMPLEMENT ME
+                this.reg[regA] = this.reg[regA] * this.reg[regB];
                 break;
         }
     }
@@ -91,28 +94,43 @@ class CPU {
     tick() {
         // Load the instruction register (IR) from the current PC
         // !!! IMPLEMENT ME
+        this.reg.IR = this.ram.read(this.reg.PC);
 
         // Debugging output
-        //console.log(`${this.reg.PC}: ${this.reg.IR.toString(2)}`);
+        // console.log(`${this.reg.PC}: ${this.reg.IR.toString(2)}`);
 
         // Based on the value in the Instruction Register, locate the
         // appropriate hander in the branchTable
-        // !!! IMPLEMENT ME
-        // let handler = ...
+        let handler = this.branchTable[this.reg.IR];
 
         // Check that the handler is defined, halt if not (invalid
         // instruction)
-        // !!! IMPLEMENT ME
+        if (handler === undefined) {
+            console.error('Unknown opcode ' + this.reg.IR);
+            this.stopClock(); // exit emulator
+            return;
+        }
+
+        // Read OperandA and OperandB
+        let operandA = this.ram.read(this.reg.PC + 1);
+        let operandB = this.ram.read(this.reg.PC + 2);
 
         // We need to use call() so we can set the "this" value inside
         // the handler (otherwise it will be undefined in the handler)
         handler.call(this, operandA, operandB);
 
         // Increment the PC register to go to the next instruction
-        // !!! IMPLEMENT ME
+        this.reg.PC += ((this.reg.IR >> 6) & 0b00000011) + 1;
     }
 
     // INSTRUCTION HANDLER CODE:
+
+    /**
+     * ADD R R
+     */
+    ADD(regA, regB) {
+        this.alu('ADD', regA, regB);
+    }
 
     /**
      * HLT
@@ -124,23 +142,22 @@ class CPU {
     /**
      * LDI R,I
      */
-    LDI(reg, value) {
-        // !!! IMPLEMENT ME
+    LDI(regNum, value) {
+        this.reg[regNum] = value;
     }
 
     /**
      * MUL R,R
      */
     MUL(regA, regB) {
-        // !!! IMPLEMENT ME
-        // Call the ALU
+        this.alu('MUL', regA, regB);
     }
 
     /**
      * PRN R
      */
     PRN(regA) {
-        // !!! IMPLEMENT ME
+        console.log(this.reg[regA]);
     }
 }
 
