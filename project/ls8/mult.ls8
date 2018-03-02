@@ -1,14 +1,14 @@
 # mult.ls8
 
-00000100 # LDI R0,8    Store 8 in R0
+10011001 # LDI R0,8  Load R0 with value 8
 00000000
 00001000
-00000100 # LDI R1,9    Store 9 in R1
+10011001 # LDI R1,9  Load R1 with value 9
 00000001
 00001001
-00000101 # MUL R0,R1   Multiply R1 by R0, storing the result in R0
+10101010 # MUL R0,R1 Multiply R0*R1, storing result in R0
 00000000
 00000001
-00000110 # PRN R0      Print the value in R0
+01000011 # PRN R0    Print value in R0
 00000000
-00011011 # HLT         Halt and quit
+00000001 # HLT       Halt
