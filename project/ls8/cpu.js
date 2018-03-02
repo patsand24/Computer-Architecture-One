@@ -127,6 +127,14 @@ class CPU {
         }
     }
 
+    getFlag(flag) {
+        if (this.reg.FL & flag === flag) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     /**
      * ALU functionality
      * 
