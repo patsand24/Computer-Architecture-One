@@ -30,6 +30,10 @@ const OR = 0b10110001;
 const SUB = 0b10101001;
 const XOR = 0b10110010;
 
+const FL_EQ = 0b00000001;
+const FL_GT = 0b00000010;
+const FL_LT = 0b00000100;
+
 /**
  * Class for simulating a simple Computer (CPU & memory)
  */
@@ -48,6 +52,9 @@ class CPU {
         // Special-purpose registers
         this.reg.PC = 0; // Program Counter
         this.reg.IR = 0; // Instruction Register
+        this.reg.FL = 0;
+
+        this.interruptEnabled = true;
 
 		this.setupBranchTable();
     }
@@ -110,6 +117,16 @@ class CPU {
         clearInterval(this.clock);
     }
 
+    setFlag(flag, value) {
+        if (value === true) {
+            //Set the Flag
+            this.reg.FL = this.reg.FL | flag;
+        } else {
+            // Clear the Flag to 0
+            this.reg.FL = this.reg.FL & ~flag;
+        }
+    }
+
     /**
      * ALU functionality
      * 
@@ -140,15 +157,9 @@ class CPU {
                 this.reg[regA] = this.reg[regA] / this.reg[regB];
                 break;
             case 'CMP':
-                if (this.reg[regA] === this.reg[regB]) {
-                    this.reg.FL = this.reg.FL | 0b00000001;
-                }
-                if (this.reg[regA] > this.reg[regB]) {
-                    this.reg.FL = this.reg.FL | 0b00000010;
-                }
-                if (this.reg[regA] < this.reg[regB]) {
-                    this.reg.FL = this.reg.FL | 0b00000100;
-                }
+                this.setFlag(FL_EQ, this.reg[regA] === this.reg[regB]);
+                this.setFlag(FL_GT, this.reg[regA] > this.reg[regB]);
+                this.setFlag(FL_LT, this.reg[regA] < this.reg[regB]);
                 break;
             case 'MOD':
                 if (this.reg[regB] === 0) {
